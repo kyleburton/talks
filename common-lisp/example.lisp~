@@ -1,0 +1,24 @@
+;; C-u M-x slime
+;; Type 'sbcl' and press return
+
+'(setf asdf:*central-registry*
+      (list* '*default-pathname-defaults*
+             #p"./common-lisp/"
+             #p"./"
+             asdf:*central-registry*))
+
+(setf asdf:*central-registry*
+      (list* '*default-pathname-defaults*
+             #p"/home/kyle/personal/projects/this-blog/talks/2013-redsnake-lisp-macros/common-lisp/systems/"
+             nil))
+
+
+;; *default-pathname-defaults*
+;; asdf:*central-registry*
+
+
+;; (asdf:operate 'asdf:load-op 'pcond)
+
+;; (quicklisp-quickstart:install)
+(ql:add-to-init-file)
+(ql:quickload "cl-unification")
