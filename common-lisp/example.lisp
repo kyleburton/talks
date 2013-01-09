@@ -4,8 +4,10 @@
 ;; http://www.quicklisp.org/
 ;;   curl -O http://beta.quicklisp.org/quicklisp.lisp
 ;;   M-x slime-load-file quicklisp.lisp
+;;   (quicklisp-quickstart:install)
 (ql:quickload "cl-unification")
 (ql:quickload "cl-ppcre")
+;; now unarchive pcond  into ~/quicklisp/local-projects
 (ql:quickload "pcond")
 
 
