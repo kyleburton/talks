@@ -45,3 +45,65 @@
 
   )
 
+
+
+
+
+
+
+
+(aprog1
+    )
+
+(let [value (do-calc)]
+  (save-to-db some-name db-calc)
+  value)
+
+(aprog1
+    (do-calc)
+  (save-to-db some-name it))
+
+
+(let [it (do-calc)]
+  (save-to-db some-name it)
+  it)
+
+(defmacro aprog1 [first & body]
+  `(let [~'it ~first]
+     ~@body
+     ~'it))
+
+
+(defmacro xprog1 [sym first & body]
+  `(let [~sym ~first]
+     ~@body
+     ~sym))
+
+(xprog1 xx (do-calc)
+  (save-to-db .. xx))
+
+(defmacro xlet [& forms]
+  (let [[bindings _ body]
+        (partition-by #(= '---- %1) forms)]
+    `(let ~(vec bindings)
+       ~@body)))
+
+(xlet
+ x 1
+ y 2
+ ----
+ (+ x y))
+
+
+(let [if (some-bool)]
+  (if it
+    ...))
+
+(aif (some-bool)
+     ())
+
+
+
+
+
+

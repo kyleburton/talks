@@ -1,3 +1,22 @@
+
+Title:             The Patterns You Can't {See,Refactor}.  
+
+Abstract: 
+
+There are patterns in your software that sit right in the middle of your blind spot.  There are many powerful tools for abstraction and refactoring our programming languages - Lisp Macros are a tool that allows you to abstract above the limit that is exists in most programming languages.  In the precious 10 minutes we have together I hope to convince you that Lisp Macros represent an unique, powerful tool and that learning more about them will improve you as a programmer.
+
+
+Bio:
+
+Kyle is the head of technology at Relay Network, working to fix Business to
+Consumer communication using Functional Programming and Agile methodologies as
+secret weapons to build Relay's systems.  
+
+Kyle has worked in domains ranging from e-commerce to web harvesting to large
+scale data integration. He has a very understanding wife who puts up with his
+technical vagaries and two adorable daughters (both named after cities). He
+cooks a mean soufflé.
+  
 IDEAS:
   PSC: the threading macros .. and ->
        they are both code-walkers and demonstrate changing the s-expressions
