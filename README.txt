@@ -1,7 +1,7 @@
 
-Title:             The Patterns You Can't {See,Refactor}.  
+Title:             The Patterns You Can't {See,Refactor}.
 
-Abstract: 
+Abstract:
 
 There are patterns in your software that sit right in the middle of your blind spot.  There are many powerful tools for abstraction and refactoring our programming languages - Lisp Macros are a tool that allows you to abstract above the limit that is exists in most programming languages.  In the precious 10 minutes we have together I hope to convince you that Lisp Macros represent an unique, powerful tool and that learning more about them will improve you as a programmer.
 
@@ -10,13 +10,13 @@ Bio:
 
 Kyle is the head of technology at Relay Network, working to fix Business to
 Consumer communication using Functional Programming and Agile methodologies as
-secret weapons to build Relay's systems.  
+secret weapons to build Relay's systems.
 
 Kyle has worked in domains ranging from e-commerce to web harvesting to large
 scale data integration. He has a very understanding wife who puts up with his
 technical vagaries and two adorable daughters (both named after cities). He
 cooks a mean soufflé.
-  
+
 IDEAS:
   PSC: the threading macros .. and ->
        they are both code-walkers and demonstrate changing the s-expressions
@@ -489,3 +489,83 @@ References.
 
 10. Thank you
 
+
+================================================================================
+
+```
+2019-10-02T09:49 PDT Wednesday
+
+considering giving this again, extending it, these are additional
+thoughts / ideas as I read through the notes again.
+
+   "The Mirror"
+
+     I personally experienced this when I first started studying lisp,
+     though I think I've observed this repeatedly when engineers
+     approach languages that are new to them.  I repeatedly failed to
+     see what was different or speical about what I was being exposed
+     to.  Thinking back I felt this as well when I was first exposed
+     to OO.
+
+     I think this is an expected part of human nature, of how we seek
+     to understand what we're experiencing: we use our previous
+     experience and our "model of the world" to try to understand the
+     new things.  We don't have the new vocabulary yet, so we use what
+     we've got.
+
+        [ the aprophical exmaple of people describing an elephant? ]
+
+     bootstrapping that understanding is a huge challenge ... but one
+     thing that software enginees are sometimes great at is helping
+     each other understand new ideas ...
+
+     On one hand, this is valuable as it allows us to contextualize
+     new experiences, new concepts -- see if they match a pattern we
+     already understand.  On the other hand, this gets in the way of
+     us understanding those new patterns.  If we think what we're
+     looking at matches something we already know, we no stop
+     attempting to understand what's different or new about it.
+
+     This is a huge challenge for my own learning, as it's not
+     something I am easily conscious of when it's happening.
+
+     Related phrases: "the beginner's mind", "an open mind"
+       "truley remarkable, the mind of a child is" - yoda :)
+          this is talking about the blind spots that our
+          patterns and assumptions cause us, which are in
+          the way of us understanding what we're seeing
+          for what it is vs what our preconceived notions
+          make us think it is
+
+   So, what do I mean by "The Mirror"?  Well if you're an experienced
+   software engineer, you know a language and have built and delivered
+   software in that language, you've likley got patterns and idioms
+   that you can apply to solving problems and you're likley clever
+   enough to be able to do that for any problem you are presented
+   with.    For me, when I approach new langauges, b/c of my
+   preconceived notions, they often reflect back to me the
+   idioms and approaches I already know, it takes me intentional
+   effort to reject seeing the OO patterns I'm accustomed to
+   when I look at Rust.
+
+   "What's a pattern: operations"
+      ... make a thing, prepare it and hand it back
+          this happens at Carl's Jr, McDonalds
+          in OO languages a name was chosen for this pattern: constructor
+          but its tied to the semantics of how you declare your classes
+            and since it became necessary to use this pattern
+            elsewhere though not coupled to the construction of a
+            different class, a new name had to be chosen: factory
+            it's the same 'shape' of actions: make a thing, prepare it
+            and hand it back.
+
+            in Common Lisp this is PROG2, Clojure uses 'doto'
+            although it's pretty straightforward to just use a 'let'
+            form for doing this as well.
+
+            instead of being coupled to the definition or initialization of a
+            class, it's instead named for the actions or order of operations
+            being taken.  IMO this ends up being more composable.
+
+
+```
