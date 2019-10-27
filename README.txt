@@ -3,29 +3,16 @@ Title:             The Patterns You Can't {See,Refactor}.
 
 Abstract:
 
-There are patterns in your software that sit right in the middle of your blind spot.  There are many powerful tools for abstraction and refactoring our programming languages - Lisp Macros are a tool that allows you to abstract above the limit that is exists in most programming languages.  In the precious 10 minutes we have together I hope to convince you that Lisp Macros represent an unique, powerful tool and that learning more about them will improve you as a programmer.
+There are patterns in our software that sit right in the middle of our blind spot.  We have many powerful tools for abstraction and refactoring in our programming languages - though I believe Lisp Macros are a tool that allows us to abstract above limits that exist in most programming languages.  In the time we have together I hope to convince you that Lisp Macros represent an unique, powerful tool and that learning more about them will improve us as programmers.
 
 
 Bio:
 
-Kyle is the head of technology at Relay Network, working to fix Business to
-Consumer communication using Functional Programming and Agile methodologies as
-secret weapons to build Relay's systems.
+I'm Kyle, I've been involved with software engineering for about twenty five years at this point (2019).  I've worked in domains and industries ranging from travel to finance, to data integration and now video games (though it's really distributed services, I won't tell anyone if you don't).  I fancy myself an amateur chef.
 
-Kyle has worked in domains ranging from e-commerce to web harvesting to large
-scale data integration. He has a very understanding wife who puts up with his
-technical vagaries and two adorable daughters (both named after cities). He
-cooks a mean soufflé.
 
 IDEAS:
-  PSC: the threading macros .. and ->
-       they are both code-walkers and demonstrate changing the s-expressions
-
-  TAV: 'Writing Code to write your Code.'
-  NC:  'A macro is just what you would have written anyway.'
-
-  TAV:
-       'You have talked about how in almost every language there is a ceiling'
+  TAV: 'You have talked about how in almost every language there is a ceiling'
        'macros are the only thing that lifts the ceiling of abstraction'
 
     Perhaps document some kind of hierarchy of abstractions?
@@ -36,13 +23,6 @@ IDEAS:
      SEMANTIC NAMING:                       Assembly
      NONE:                                  Machine Code
 
-This talk is for Philly RedSnake 2013.
-
-NB: It must fit within the 10 minute lightning talk format.
-
-Prospective title:
-
-   The Patterns You Can't {See,Refactor}.
 
       There are Patterns in your Software that you can't see
       because the syntatax of your language is a barrier.
@@ -53,48 +33,75 @@ Prospective title:
 
 Beautiful macros:
 
- Clojure: .., ->, ->>
+ Clojure: .., ->, ->>, aif, with-open
 
 
 h1. Overview
 
 * Before I begin
-* What is a pattern
-* What are some examples of those patterns: internal and external
-   DSLs; not doing anything at all
+* What is a pattern?
+* Examples of those patterns?: internal and external DSLs;
+  not doing anything at all
 * What Ruby, Python, JavaScript, Java do about these patterns
 * How Lisps approach these patterns
 
 h1. The Mirror
 
-* Reflection of the observer's mind; Blub Paradox
+* Reflection of the observer's mind; aka The Blub Paradox
 
-[ When I first saw macros I did not understand them, it took me a while to not
-  just see them as an extension of the langauge features I already knew.  That
-  is the message I will attempt to convey in the next 10 minutes.  To convince
-  you that there is more to macros than the language features you already
+[ When I first saw macros I did not understand them, it took me an
+  embarassing long time to not just see them as an extension of the
+  langauge features I already knew.  That is a key part of the message
+  I am attempting to convey in the next 10 minutes.  To convince you
+  that there is more to macros than the language features you already
   understand. ]
 
 h1. What is a pattern?
 
-* giving something a name gives you power: you can discuss it,
+* naming something gives us power over it: we can discuss it,
   manipulate it, share it
-* pattern of repeated operations: Procedure, Function
-* pattern of repeated design:     "Design Pattern"
-* pattern of repeated syntax:     Macro
+* pattern of operations: Procedure, Function
+* pattern of design:     "Design Pattern"
+* pattern of syntax:     Macro
 
-[ As software developers we deal with patterns all the time.  We create
-  classes, libraries and APIs to abstract away the commonalities we see in our
-  software. In many of the languages we use functions, modules and libraries
-  are our upper bound for abstraction. ]
+[ As software developers we deal with patterns all the time.  We
+  create classes, libraries and APIs to abstract away the common
+  operations and designs we see in our software. In many of the
+  languages we use functions, modules and libraries are our upper
+  bound for abstraction. ]
 
-h1. Different
+h1. Accidental and Inherent Complexity
 
-* Delay Execution: if, unless, when
-* Reorder: .., ->
-* Introduce Bindings: let, with-open
+[ Inherent complexity cannot be eliminated.  It is inherent in the
+  domain and must be part of any solution we can express.  Inherent
+  complexity is unaviodable.  In a sense it is our lower bound for how
+  we express a solution, how we express an implementation.  In
+  mathematics an integer isn't 32 or 64 bits.  Integers are an
+  infinite set.  That they are bounded and can over flow (or
+  underflow) is accidental complexity of performing arithmatic in our
+  software.  It's a practical and useful limitation, though it it's a
+  leaky abstraction.  When our calculations cross these boundaries we
+  must abort or shift to a significantly less efficient implementation
+  (bignum). ]
 
-h1. What's a pattern: operations
+[ Macros are a powerful tool for reigning in accidental complexity,
+  allowing us to approach, more and more closely, minimally complex
+  implementations. ]
+
+
+h1. Super Powers: What makes Macros Different from other tools for Abstraction?
+
+* Delay Execution:           if, unless, when
+* Reorder Computation:       .., ->
+* Introduce Bindings:        let, with-open
+* Compute at Compile time
+
+[ What makes macros different from interfaces, classes, procedures,
+  functions and closures?  Macros can precompute or delay execution,
+  they can generate code, change semantics by re-ordering computation,
+  introduce bindings and generate code. ]
+
+h1. What's a pattern: Operations
 
 * for loop: sequence or mapping
 * folding: (types of mappings operations) left, right
@@ -102,13 +109,20 @@ h1. What's a pattern: operations
 * Memoization: adding behavior to / modifying the behavior of already existing code
 * Deferring execution
 
-[ Languages that support closures or anonymous functions often to use them to
-  support these kinds of patterns.  Languages that do not, like Java, can still
-  support them, though the accidental complexity tends to be pretty high compared
-  to languages that support them.
+[ Languages that support first class closures or anonymous functions
+  often use them to support these kinds of patterns.  Languages that
+  do not, like Java, can still support them, though the accidental
+  complexity tends to be high compared to languages that support them.
 
-  Java also makes use of interfaces and annotations.  But these didn't always
-  exist in the language. ]
+  Java also makes use of interfaces and annotations.  But these didn't
+  always exist in the language itself.  Before the language gods
+  decided to allow you to use anonymous functions your only recourse
+  was anonymous abstract classes or one off implementations of
+  interfaces.
+
+  Macros allow you to implement any operation you find useful, whether
+  or not the language designers had the forethought to recognize those
+  operations. ]
 
 h1. What's a pattern: repeated design
 
@@ -117,9 +131,8 @@ h1. What's a pattern: repeated design
 * Paul Graham: Are Design Patterns a Language Smell?
 
 * Things that need to be constructed => factory pattern
-* Highlander => Singleton
-* Extract Behavior => Stragegy
-
+* Highlander                         => Singleton (there can be only one)
+* Extract Behavior                   => Stragegy
 
 h1. What's a pattern: DSLs
 
@@ -132,14 +145,15 @@ h1. What's a pattern: DSLs
  * Ruby: ERB, haml
  * JavaScript: John Resig's JavaScript Tempaltes, Underscore's Templates,
    Mustache JS
- * Java: JSP
+ * Java: JSPs
+ * Python's Jinja templating system
 
 h1. Things you can't refactor (without resorting to eval)
 
 * Ruby:       class, module, def, begin, rescue
-* Python:     class, def, try, except
-* Java:       class, public, private, extends, throws, try, catch
-* JavaScript: function
+* Python:     class, def, try, except, if, for
+* Java:       class, public, private, extends, throws, try, catch, package
+* JavaScript: function, class
 
 [ Even with all of this, there are still things that you can not factor out of
   your language.  If you're using a HLL like Python or Ruby, these are probably
@@ -152,11 +166,11 @@ h1. Things you can't refactor (without resorting to eval)
   In langauges that support closures you can, but you can't avoid typing
   the keywords for a closure: 'def', 'function', or 'do'.
 
-h1. Things you can't refactor
+h1. [more] Things you can't refactor
 
-* introduction of new variable bindings
-* new control structures that interact with your systems exception handling
-  mechanisims.
+* Introduction of new variable bindings
+* New control structures, espeically ones that interact with
+  your languages exception handling mechanisims.
 
 [ These are perhaps the last bastion for homoiconic languages that support
   macros.  Being able to introduce scope, bindings and interact with exception
@@ -198,10 +212,19 @@ h1. Example: unless
     (println "it happened"))
 
 [ If you try to do this with just a function, you will have to come up with a way to
-  deferr the execution of the body - you could wrap it in a closure, though that brings
-  in the additional syntax of wrapping the code in a function. ]
+  defer the execution of the body - you could wrap it in a closure, though that causes accidental
+  complexity to slip back in with the additional syntax of wrapping the code in a function.
 
-h1. Example: Clojure's #() macro
+  It's become common for modern langauges to introduce _more_ syntax
+  to allow simpler use of closures or anonymous functions, eg in
+  JavaScript ()=>{} and Java's Lambda expressions.
+
+  This cleanly solves for many of the use-cases where you'd like to
+  defer execution.
+
+  ]
+
+h1. Example: Clojure's reader #() macro
 
   If you want a function that does: a + (b * (c / a)):
 
