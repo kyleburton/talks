@@ -1,0 +1,4 @@
+(let [wtr (io/writer "input.txt")]
+ (try
+  (.write wtr "hello, world\n")
+  (finally (.close wtr))))

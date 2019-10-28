@@ -1,0 +1,10 @@
+$ whois kyle.burton
+   Name:                 Kyle Burton
+   Status:               Engineering Lead @ Riot Games
+   Creation Date:        1995
+   Road to Lisp:         First tentative steps taken in 2001
+   Clojure:              2008
+   Abuse Contact Email:  kyle.burton@gmail.com
+>>> Last update of whois database: 2019-10-27T20:06:11Z <<<
+
+TERMS OF USE: You are authorized to interact and ask questions during this talk. Your presenter likes to think he is "desperately seeking no barriers to abstraction".  This talk is provided by the presenter for information sharing purposes only, and to assist in expanding awareness of macros.  You agree that you may use this information to think about new ways to build and maintain your programs.

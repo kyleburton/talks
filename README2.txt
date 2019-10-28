@@ -120,6 +120,8 @@ Overall flow for the talk?
 
 concepts / threads / ideas to follow up on:
 
+* Dependency Injection is a solution to a problem caused by Object Oriented Design
+
 
 
 References:

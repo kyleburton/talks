@@ -1,7 +1,8 @@
 (ns scratchpad.macros
   (:require
    [clojure.tools.logging :as log]
-   [clojure.walk          :as walk]))
+   [clojure.walk          :as walk]
+   [clojure.core.async    :refer [<!! >! chan go alts!!] :as async]))
 
 (defn flip-coin []
   (-> 2 rand int zero?))
@@ -94,6 +95,70 @@
 
   )
 
+;; compute at compile time
+(comment
+
+  (let [name       "Kyle"
+        curr-year  2019
+        birth-year 1971]
+    (stmpl "Hi [name], if you were born in [birth-year] that makes you [(- curr-year birth-year)] years old!"))
+
+  (tokenize "Hi [name], if you were born in [year] that makes you [(- curr-year year)] years old!" "[]")
+
+  )
+
+(defn tokenize [s d]
+  (let [st (java.util.StringTokenizer. s d)]
+    (loop [tokens    []
+           ttype     :string]
+      (cond
+        (.hasMoreTokens st)
+        (recur (conj tokens [ttype (.nextToken st)])
+               (if (= :string ttype)
+                 :code
+                 :string))
+
+        :otherwise
+        tokens))))
+
+(defmacro stmpl [s]
+  (let [sbv (gensym)]
+    `(let [~sbv (java.lang.StringBuilder.)]
+       ~@(map
+          (fn [[ttype tok]]
+            (cond
+              (= :string ttype)
+              `(.append ~sbv ~tok)
+
+              (= :code   ttype)
+              `(.append ~sbv (str ~(read-string tok)))))
+          (tokenize s "[]"))
+       (.toString ~sbv))))
+
+(comment
+
+  (macroexpand '(stmpl "Hi [name], if you were born in [year] that makes you [(- curr-year year)] years old!"))
+  (let* [G__23771 (java.lang.StringBuilder.)]
+    (.append G__23771 "Hi ")
+    (.append G__23771 (str name))
+    (.append G__23771 ", if you were born in ")
+    (.append G__23771 (str year))
+    (.append G__23771 " that makes you ")
+    (.append G__23771 (str (- curr-year year)))
+    (.append G__23771 " years old!")
+    (.toString G__23771))
+
+  (let [name       "Kyle"
+        curr-year  (.. (java.time.LocalDateTime/now) getYear)
+        birth-year 1971]
+    (stmpl "Hi [name], if you were born in [birth-year] that makes you [(- curr-year birth-year)] years old!"))
+
+  (.. (java.util.Date.) getYear)
+
+
+
+  )
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; REORDER COMPUTATION
 
@@ -137,178 +202,112 @@
   ;; cool, looks like it works as expected
 
   ;; first, let's start with a functioning example
-  ;; using what's already available to us:
+  ;; using what's already available to us.  Here
+  ;; I'm going going to use core.async and a channel
+  ;; to grab the first of whichever one of these succeeds
 
-  (->>
-   [(fn [] (if (takes-random-time 500) :first-post))
-    (fn [] (if (takes-random-time 500) :second-post))
-    (fn [] (if (takes-random-time 500) :third-post))
-    (fn [] (if (takes-random-time 500) :fourth-post))
-    (fn [] (if (takes-random-time 500) :fifth-post))]
-   (pmap (fn [f] (f)))
-   (filter identity)
-   first)
+  (let [c (chan 1)]
+    (go (and (takes-random-time 100) (>! c :result1)))
+    (go (and (takes-random-time 100) (>! c :result2)))
+    (go (and (takes-random-time 100) (>! c :result3)))
+    (go (and (takes-random-time 100) (>! c :result4)))
+    (go (and (takes-random-time 100) (>! c :result5)))
+    (let [[result from-where] (alts!! [c (async/timeout 200)])]
+      (async/close! c)
+      result))
 
-  ;; nb: first-post will often be first b/c it begins
-  ;; executing first
+  ;; so our basic shape will be:
+  (defmacro parallel-cond [& forms]
+    `(let [c (chan 1)]
+       (go (and pred1 (>! c result1)))
+       ...repeat...
+       (let [[result from-where] (alts!! [c (async/timeout 200)])]
+         (async/close! c)
+         result)))
 
-  ;; another limitation is that pmap processes it's sequence in
-  ;; chunks, though this is fine for our purposes here
-
-  ;; What's the accidental complexity in our code there?
-  ;; * all those (fn [] ...) parts
-  ;; * the pmap, filter and first expressions
-
-  ;; You might be thinking that we can reduce some of this
-  ;; by just factoring out the constant parts into a function
-  ;; and you'd be right:
-
-  (parallel-first-of
-   (fn [] (if (takes-random-time 500) :first-post))
-   (fn [] (if (takes-random-time 500) :second-post))
-   (fn [] (if (takes-random-time 500) :third-post))
-   (fn [] (if (takes-random-time 500) :fourth-post))
-   (fn [] (if (takes-random-time 500) :fifth-post)))
-  )
-
-(defn parallel-first-of [& fns]
-  (->>
-   fns
-   (pmap (fn [f] (f)))
-   (filter identity)
-   first))
-
-
-(comment
-  ;; indeed, this works:
-  (parallel-first-of
-   (fn [] (if (takes-random-time 500) :first-post))
-   (fn [] (if (takes-random-time 500) :second-post))
-   (fn [] (if (takes-random-time 500) :third-post))
-   (fn [] (if (takes-random-time 500) :fourth-post))
-   (fn [] (if (takes-random-time 500) :fifth-post)))
-
-  ;; and in fact it's pretty minimal if we use clojures' #() reader
-  ;; macro:
-
-  (parallel-first-of
-   #(if (takes-random-time 500) :first-post)
-   #(if (takes-random-time 500) :second-post)
-   #(if (takes-random-time 500) :third-post)
-   #(if (takes-random-time 500) :fourth-post)
-   #(if (takes-random-time 500) :fifth-post))
-
-  ;; although, we've still got some accidental complexity in those
-  ;; lambdas and some extra overhead in the additional function call
-
-  ;; doens't quite look like a cond, my goal is to be able to write:
-
-  (parallel-cond
-   (takes-random-time 500) :first-post
-   (takes-random-time 500) :second-post
-   (takes-random-time 500) :third-post
-   (takes-random-time 500) :fourth-post
-   (takes-random-time 500) :fifth-post)
-
-  ;; going back to our original, verbose, code:
-
-  (->>
-   [(fn [] (if (takes-random-time 500) :first-post))
-    (fn [] (if (takes-random-time 500) :second-post))
-    (fn [] (if (takes-random-time 500) :third-post))
-    (fn [] (if (takes-random-time 500) :fourth-post))
-    (fn [] (if (takes-random-time 500) :fifth-post))]
-   (pmap (fn [f] (f)))
-   (filter identity)
-   first)
-
-  ;; we if we start w/that and wrap it with a backquote, we're
-  ;; most of the way there:
-
-  (defmacro parallel-cond [& exprs]
-    `(->>
-      ...but-what-do-we-put-here?...
-      (pmap (fn [f] (f)))
-      (filter identity)
-      first))
-
-  ;; so we've got a sequence of: pred result, pred result, ...
-  ;; and we need a vector of:    (fn [] (if pred result))
-  ;; we can get a vector with mapv and we can return the code
-  ;; for those functions with another backquote:
+  (defmacro parallel-cond [& forms]
+    `(let [c (chan 1)]
+       ~@(map (fn [[pred expr]]
+                `(go (and ~pred (>! c ~expr))))
+              (partition 2 forms))
+       (let [[result from-where] (alts!! [c (async/timeout 200)])]
+         (async/close! c)
+         result)))
 
   )
 
-(defmacro parallel-cond [& exprs]
-  `(->>
-    ~(mapv (fn [[expr res]] `(fn [] (if ~expr ~res))) (partition 2 exprs))
-    (pmap (fn [f#] (f#)))
-    (filter identity)
-    first))
 
+(defmacro parallel-cond [timeout & forms]
+  (let [chan-vname (gensym)]
+    `(let [~chan-vname (chan 1)]
+       ~@(map (fn [[pred expr]]
+                `(go (and ~pred (>! ~chan-vname ~expr))))
+              (partition 2 forms))
+       (let [[result# from-where#] (alts!! [~chan-vname (async/timeout ~timeout)])]
+         (async/close! ~chan-vname)
+         result#))))
 
 (comment
 
   ;; let's see what that looks like:
   (macroexpand
-   '(parallel-cond
-     (takes-random-time 500) :first-post
-     (takes-random-time 500) :second-post
-     (takes-random-time 500) :third-post
-     (takes-random-time 500) :fourth-post))
+   '(parallel-cond 500
+                   (takes-random-time 500) :first-post
+                   (takes-random-time 500) :second-post
+                   (takes-random-time 500) :third-post
+                   (takes-random-time 500) :fourth-post))
 
-  ;; ok I think that looks right (note: I removed all of the "clojure.core/" to make the output easeir on my eyes :)
-
-  ;; (first
-  ;;  (filter
-  ;;   identity
-  ;;   (pmap
-  ;;    (fn [f__7498__auto__] (f__7498__auto__))
-  ;;    [(fn [] (if (takes-random-time 500) :first-post))
-  ;;     (fn [] (if (takes-random-time 500) :second-post))
-  ;;     (fn [] (if (takes-random-time 500) :third-post))
-  ;;     (fn [] (if (takes-random-time 500) :fourth-post))])))
+  ;; ok that looks about right (nb: I removed the namespaces to make this easier to read)
+  (let* [G__15507 (chan 1)]
+    (go (and (takes-random-time 500) (>! G__15507 :first-post)))
+    (go (and (takes-random-time 500) (>! G__15507 :second-post)))
+    (go (and (takes-random-time 500) (>! G__15507 :third-post)))
+    (go (and (takes-random-time 500) (>! G__15507 :fourth-post)))
+    (let [[result__15427__auto__ from-where__15428__auto__] (alts!! [G__15507 (async/timeout 500)])]
+      (async/close! G__15507) result__15427__auto__))
 
   ;; lets try it out
   (parallel-cond
-   (takes-random-time 500) (do (log/info "first-post")  :first-post)
-   (takes-random-time 500) (do (log/info "second-post") :second-post)
-   (takes-random-time 500) (do (log/info "third-post")  :third-post)
-   (takes-random-time 500) (do (log/info "fourth-post") :fourth-post))
+   150
+   (takes-random-time 100) (do (log/info "first-post")  :first-post)
+   (takes-random-time 100) (do (log/info "second-post") :second-post)
+   (takes-random-time 100) (do (log/info "third-post")  :third-post)
+   (takes-random-time 100) (do (log/info "fourth-post") :fourth-post)
+   (takes-random-time 100) (do (log/info "fifth-post")  :fifth-post))
 
   )
 
-(
- ;; what if we wanted a do form that executed one of its forms at
- ;; random and none of the others?
+(comment
+  ;; what if we wanted a do form that executed one of its forms at
+  ;; random and none of the others?
 
- ;; starting with a concrete example:
+  ;; starting with a concrete example:
 
- ((->>
-   [(fn [] :first)
-    (fn [] :second)
-    (fn [] :third)]
-   shuffle
-   first))
+  ((->>
+    [(fn [] :first)
+     (fn [] :second)
+     (fn [] :third)]
+    shuffle
+    first))
 
 
- ;; if we remove all of the acciental complexity from the above I think we'd end up at:
+  ;; if we remove all of the acciental complexity from the above I think we'd end up at:
 
- (do-random
-  :first
-  :second
-  :third)
+  (do-random
+   :first
+   :second
+   :third)
 
- ;; the transformations are pretty close to our last example, the overall should look like:
+  ;; the transformations are pretty close to our last example, the overall should look like:
 
- (defmacro do-random [& exprs]
-   `((->>
-      [...functions here...]
-      shuffle
-      first)))
+  (defmacro do-random [& exprs]
+    `((->>
+       [...functions here...]
+       shuffle
+       first)))
 
- ;; though a bit less complex since we don't have to partition the macro's arguments:
- )
+  ;; though a bit less complex since we don't have to partition the macro's arguments:
+  )
 
 (defmacro do-random [& exprs]
   `((->>
@@ -594,5 +593,25 @@
                   :size        "large"
                   :stock       0})
   ;; => :backordered
+
+
+  )
+
+
+(comment
+  (macroexpand '(-> 5 z y x))
+  (x (y (z 5)))
+
+  (->>
+   ["sort" "this" "by" "length"]
+   (map (fn [s] [(count s) s]))
+   (sort-by first)
+   (mapv second))
+
+  (->>
+   ["sort" "this" "by" "length"]
+   (map #(list (count %) %))
+   (sort-by first)
+   (mapv second))
 
   )
