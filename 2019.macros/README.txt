@@ -3,7 +3,7 @@ Title:             The Patterns You Can't {See,Refactor}.
 
 Abstract:
 
-There are patterns in our software that sit right in the middle of our blind spot.  We have many powerful tools for abstraction and refactoring in our programming languages - though I believe Lisp Macros are a tool that allows us to abstract above limits that exist in most programming languages.  In the time we have together I hope to convince you that Lisp Macros represent an unique, powerful tool and that learning more about them will improve us as programmers.
+There are patterns in our software that sit right in the middle of our blind spot.  We have many powerful tools for abstraction and refactoring our programming languages - though I believe Lisp Macros are a tool that allows us to abstract above limits that exist in most programming languages.  In the time we have together I hope to convince you that Lisp Macros represent an unique, powerful tool and that learning more about them will improve us as programmers.
 
 
 Bio:
