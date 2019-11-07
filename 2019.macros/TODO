@@ -1,0 +1,23 @@
+TODO: in my clj libraries (eg: clj-xpath) find examples of macros and add them into the talk
+    clj-xpath/src/clj_xpath/core.clj
+    154:(defmacro with-namespace-awareness
+    172:(defmacro with-namespace-context
+
+    impresario/src/impresario/dsl.clj
+    57:(defmacro state [state-name & [attrs]]
+    109:(defmacro defmachine [workflow-name & forms]
+    133:(defmacro on-enter-any! [& body]
+    145:(defmacro on-exit-any! [& body]
+    158:(defmacro on-enter! [state-name & body]
+    172:(defmacro on-transition! [from-state to-state & body]
+    184:(defmacro on-transition-any! [& body]
+    192:(defmacro register! [workflow-name]
+    198:(defmacro defpredicate [from-state to-state & body]
+    206:(defmacro defpredicate-as [from-state to-state alias]
+
+    impresario/src/impresario/core.clj
+    65:(defmacro register-workflow!
+
+TODO: maybe introduce a defmemo? defcache
+TODO: there is an example defcache in clojure.core cache as a helper for generating the cache implementations
+TODO: some more examples in clj-etl-utils: with-stdout-to-file, with-stderr-to-file
