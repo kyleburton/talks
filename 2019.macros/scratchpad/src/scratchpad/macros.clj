@@ -153,6 +153,13 @@
         birth-year 1971]
     (stmpl "Hi [name], if you were born in [birth-year] that makes you [(- curr-year birth-year)] years old!"))
 
+  (macroexpand
+   '(let [name       "Kyle"
+         curr-year  (.. (java.time.LocalDateTime/now) getYear)
+         birth-year 1971]
+      (stmpl "Hi [name], if you were born in [birth-year] that makes you [(- curr-year birth-year)] years old! [(- curr-year birth-year)]")))
+
+
   (.. (java.util.Date.) getYear)
 
 
