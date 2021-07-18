@@ -10,7 +10,13 @@ Folks I've worked with recently (2021) requested I do a bash workshop.  Why have
 * hey, you say zsh (or fish or oil) are better shells?  Awesome!  I'm not familair w/them, I am w/bash so that's what this workshop is about :-D
 * everything in this talk is in the git repo, go ahead and clone it!
 
-The mindset: "unix is the IDE", repeatability, composition, "unix as literature", "in the beginning was the command line"
+I think, overall I'm hoping to convey the mindset: "unix is the IDE", repeatability, and composition.  I thik I got early signals of these things from a few resources "unix as literature", "in the beginning was the command line"
+
+So, who's the audience?  I think this is folks who know that there is a shell and know a few basics and are looking to see how other folks use their shells as part of their core workflow.
+
+"cultivate your impatience"
+
+Lets talk about it at a high level first:
 
 * my IDE begins with shells that I compose into workspaces, one per "project"
 * GNU Screen, or Tmux if you prefer (I happen to know screen)
@@ -20,6 +26,12 @@ redirection, capturing intermediate output into a script & then tidying it up be
 provides a record of what you'd done, "generating code"
 
 repetition, while, for, seq, awaiting something
+
+seeing the state in your shell & terminal and some ways to think about this
+
+* pwd
+* jobs, foreground and background
+* your history & how to help make it more valuable
 
 When to alias vs function vs standalone shell script.
 
@@ -47,7 +59,11 @@ Customization
 
 * this is a trade off, the more bespoke you are, the harder it is for others to work with you don't become the crazy hermit / recluse with a unique vernacular
 * do this to help you remember things
+ * lets take a look at my .gitconfig
+ * the kinds of things Kyle put into his 'kb' command (which violates the bespokeness)
 * reduce the number of lookups you need to do, the number of hops
+ * rclone
+ * rssh
 
 command line completion
 
