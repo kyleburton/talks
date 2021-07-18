@@ -417,7 +417,7 @@
 (defn pcond-expand-binding [binding]
   (cond
     (-> binding first (= :re))
-    (let [[_ regex var bindings] binding]
+    (let [[_ bindings regex var] binding]
       `[[~@bindings] (~'rest (~'re-find ~regex ~var))])
 
     (-> binding first (= :pat))
@@ -454,7 +454,7 @@
        (and
         (seqable? elt)
         (-> elt first (= :re)))
-       `(~'and ~@(nth elt 3))
+       `(~'and ~@(nth elt 1))
 
        (and
         (seqable? elt)
@@ -469,8 +469,9 @@
 (comment
 
   (pcond-rewrite-predicate '(and (:pat {:keys [color]} order)
-                                 (:re #"\(rgb (..) (..) (..)\)" color [red green blue])
+                                 (:re  [red green blue] #"\(rgb (..) (..) (..)\)" color)
                                  (> (Integer/parseInt blue 16) 200)))
+
   )
 
 (defn pcond-expand-clauses [[[pred consequent] & clauses]]
@@ -484,7 +485,7 @@
 
 (comment
   (pcond-expand-clauses [['(and (:pat {:keys [color]} order)
-                                (:re #"\(rgb (..) (..) (..)\)" color [red green blue])
+                                (:re [red green blue] #"\(rgb (..) (..) (..)\)" color)
                                 (> (Integer/parseInt blue 16) 200)) :consequent]])
 
 
@@ -545,7 +546,7 @@
        (place-on-backorder order))
 
      (and (:pat {:keys [color]} order)
-          (:re #"\(rgb (..) (..) (..)\)" color [red green blue])
+          (:re [red green blue] #"\(rgb (..) (..) (..)\)" color)
           (> (Integer/parseInt blue 16) 200))
      (check-if-customer-alergic-to-blue)
 
@@ -565,7 +566,7 @@
      :backordered)
 
    (and (:pat {:keys [color]} order)
-        (:re #"\(rgb (..) (..) (..)\)" color [red green blue])
+        (:re [red green blue] #"\(rgb (..) (..) (..)\)" color)
         (> (Integer/parseInt blue 16) 200))
    (do
      (check-if-customer-alergic-to-blue)
@@ -619,6 +620,18 @@
    ["sort" "this" "by" "length"]
    (map #(list (count %) %))
    (sort-by first)
+   (mapv second))
+
+  (->>
+   ["sort" "this" "by" "length"]
+   (map (juxt count identity))
+   (sort-by first)
+   (mapv second))
+
+  (->>
+   ["sort" "this" "by" "length"]
+   (map (juxt count identity))
+   sort
    (mapv second))
 
   )
