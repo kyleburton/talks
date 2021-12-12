@@ -8,7 +8,7 @@
   :global-vars  {*warn-on-reflection* true}
   :dependencies [
     [org.clojure/clojure                     "1.10.1"]
-    [org.clojure/tools.logging                "0.4.1"]
+    [org.clojure/tools.logging                "1.2.1"]
     [org.clojure/tools.nrepl                 "0.2.13"]
     [org.clojure/core.async                 "0.4.500"]
     [cider/cider-nrepl                       "0.22.0"]
